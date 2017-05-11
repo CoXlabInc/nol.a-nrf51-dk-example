@@ -1,8 +1,0 @@
-{
- "args": [
-  "nordic-nrf51-dk"
- ],
- "sh": false,
- "env": {},
- "port": "None"
-}
