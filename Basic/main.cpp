@@ -30,7 +30,7 @@ void setup() {
   System.ledOn(0);
   System.ledOn(3);
   Serial.begin(115200);
-  printf("\n*** Serial test for nRF51-DK ***\n");
+  printf("\n*** [nRF51-DK] Basic Functions ***\n");
 
   tPrint.onFired(printTask, NULL);
   tPrint.startPeriodicMicros(1000000);
