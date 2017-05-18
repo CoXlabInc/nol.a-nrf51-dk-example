@@ -1,6 +1,7 @@
 #include <cox.h>
 
 Timer timerHello;
+Timer timerLEDOff;
 BLEMac *ble;
 
 static const uint8_t beaconInfo[0x17] = {
@@ -13,7 +14,24 @@ static const uint8_t beaconInfo[0x17] = {
 };
 
 static void taskHello(void *) {
-  printf("Hello World!\n");
+  System.ledOn(0);
+  timerLEDOff.startOneShot(10);
+}
+
+static void taskLEDOff(void *) {
+  System.ledOff(0);
+}
+
+static void eventButtonPressed() {
+  Serial.println("* Button pressed!");
+  if (ble->isAdvertising()) {
+    ble->endAdvertise();
+    timerHello.stop();
+  } else {
+    if (ble->beginAdvertise() == ERROR_SUCCESS) {
+      timerHello.startPeriodic(1000);
+    }
+  }
 }
 
 void setup() {
@@ -21,14 +39,17 @@ void setup() {
   Serial.println();
   Serial.println("*** [nRF51-DK] BLE Beacon ***");
 
+  timerHello.onFired(taskHello, NULL);
+  timerLEDOff.onFired(taskLEDOff, NULL);
+
+  System.onButtonPressed(0, eventButtonPressed);
+
   uint32_t ramReq;
   ble = System.initSoftDevice(0, 0, &ramReq);
   if (ble) {
     Serial.print("* BLE stack initialized successfully. The minimum required RAM base is 0x");
     Serial.print(ramReq, HEX);
     Serial.println(".");
-    timerHello.onFired(taskHello, NULL);
-    // timerHello.startPeriodic(1000);
 
     ble->setManufacturerData(
       0x0059, // Nordic Semiconductor
@@ -37,6 +58,9 @@ void setup() {
     );
     error_t err = ble->beginAdvertise();
     Serial.print("* beginAdvertise: "); Serial.println(err);
+    if (err == ERROR_SUCCESS) {
+      timerHello.startPeriodic(1000);
+    }
   } else {
     Serial.print("* BLE stack: RAM base must be adjusted to 0x");
     Serial.print(ramReq, HEX);
