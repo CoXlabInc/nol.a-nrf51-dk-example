@@ -6,14 +6,6 @@ bool isToning;
 static void printTask(void *) {
   System.ledToggle(0);
   printf("[%lu usec] Hi!\n", micros());
-
-  if (isToning) {
-    noTone(23);
-    isToning = false;
-  } else {
-    tone(23, 262);
-    isToning = true;
-  }
 }
 
 static void keyboard(SerialPort&) {
@@ -28,18 +20,14 @@ static void button() {
 
 void setup() {
   System.ledOn(0);
-  System.ledOn(3);
   Serial.begin(115200);
   printf("\n*** [nRF51-DK] Basic Functions ***\n");
 
   tPrint.onFired(printTask, NULL);
-  tPrint.startPeriodicMicros(1000000);
+  tPrint.startPeriodic(1000);
 
-  Serial.listen();
+  // Serial.listen();
   Serial.onReceive(keyboard);
 
-  pinMode(23, OUTPUT);
-  tone(23, 262);
-  isToning = true;
-  //analogWrite(23, 254);
+  // System.onButtonPressed(0, button);
 }

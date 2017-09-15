@@ -23,13 +23,18 @@ static void taskLEDOff(void *) {
 }
 
 static void eventButtonPressed() {
-  Serial.println("* Button pressed!");
   if (ble->isAdvertising()) {
+    Serial.println("* Turn off beacon!");
     ble->endAdvertise();
     timerHello.stop();
   } else {
-    if (ble->beginAdvertise() == ERROR_SUCCESS) {
+    error_t err = ble->beginAdvertise();
+    if (err == ERROR_SUCCESS) {
+      Serial.println("* Turn on beacon!");
       timerHello.startPeriodic(1000);
+    } else {
+      Serial.print("* Error during turning on beacon: ");
+      Serial.print(err);
     }
   }
 }
